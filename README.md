@@ -6,7 +6,7 @@ Script to parse/process guymager logs in bulk
 
 This python (tested on 2.7) program/script will take a set of input Guymager log files and process them to extract the following into a CSV file:
 
-*Barcode/Case Number (we are putting barcode numbers in the Case number field but this will return whatever is in the case number field. 
+*Barcode/Case Number (we are putting barcode numbers in the Case Number field but this will return whatever is in the case number field.) 
 *FilePath
 *Format
 *Number of Bytes
