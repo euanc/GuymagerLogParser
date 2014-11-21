@@ -12,7 +12,7 @@ dest_dir = str(sys.argv[2])
 
 files = []
 
-# check the input folder and find all sub directories
+
 for file in os.listdir(source_dirname):
 	if file.endswith(".info"):
 		files.append(source_dirname + "\\" + file)
