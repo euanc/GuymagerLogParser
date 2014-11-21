@@ -8,7 +8,7 @@ import re
 source_dirname= str(sys.argv[1])
 dest_dir = str(sys.argv[2])
 
-# create every possible image file for every folder in the source directory that has a streamfile in it
+
 
 files = []
 
