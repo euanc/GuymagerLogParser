@@ -22,17 +22,12 @@ outfile = open(dest_dir + "ParsedLog.csv", 'w')
 outfile.write("Barcode,FilePath,Format,Number of Bytes,Time taken,MD5 Hash,Bad sectors\n")
 
 for filename in files:
-	endedExists = 0
-	for line in open(filename):
-		
-		if line.startswith('Ended'):
-			endedExists = 1
-		
-	cntr = 0	
+
+	
 	barcode, format, filepath, numBytes, timeTaken, MD5Hash = "","","","","",""
 	for line in open(filename):	
 		
-		#print endedExists
+	
 		
 		if line.startswith('   Case number'):
 			res = re.search(":\s\d+",line)
