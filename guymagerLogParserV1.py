@@ -26,7 +26,8 @@ def main():
 
     # Set up output file
     outfile = open(args.outputfile, 'w')
-    fieldnames = ['Barcode','FilePath','Format','Number of Bytes','Time taken','MD5 Hash','Bad sectors']
+    fieldnames = ['Case number','Evidence number', 'Examiner', 'File Path','Format','Number of Bytes','Date of acquisition',
+                  'Time taken', 'MD5 Hash','Bad sectors']
     outfilecsv = csv.DictWriter(outfile, fieldnames=fieldnames)
     outfilecsv.writeheader()
 
@@ -35,41 +36,42 @@ def main():
     for filename in files:
         parsedline = {}
         for line in open(filename, 'rU'): 
-            
-            if line.startswith('   Case number'):
-                res = re.search(":\s\d+",line)
-                if res is not None:
-                    parsedline['Barcode'] = res.group(0)[2:].replace(",","")
-                else:
-                    parsedline['Barcode'] = ''
-                
-            if line.startswith('Image path and file name'):
-                #print line
-                res = re.search(":\s.+",line)
-                if res is None:
-                    throw = ""
-                else:
-                    parsedline['FilePath'] = res.group(0)[2:].replace(",","")
-            
-            if line.startswith('   User Capacity:'):
-                res = re.search("\s\d.+bytes",line)
-                parsedline['Number of Bytes'] = res.group(0)[:-5].replace(",","")
-                
-            if line.startswith('Ended'):
-                res = re.search("\(.+\)",line)
-                parsedline['Time taken'] = res.group(0)[1:-1].replace(",","")
-                
-            if line.startswith('MD5 hash                   :'):
-                res = re.search(":.+",line)
-                parsedline['MD5 Hash'] = res.group(0)[2:].replace(",","")
-                
-            if line.startswith('Format   '):
-                res = re.search(":.+",line)
-                parsedline['Format'] = res.group(0)[2:-25].replace(",","")    
 
-            if line.startswith('State: '):
-                res = re.search(":.+",line)
-                parsedline['Bad sectors'] = res.group(0)[30:-12].replace(",","")   
+            if line.strip().startswith('Case number'):
+                parsedline['Case number'] = line[26:].strip()
+
+            if line.strip().startswith('Evidence number'):
+                parsedline['Evidence number'] = line[26:].strip()
+
+            if line.strip().startswith('Examiner'):
+                parsedline['Examiner'] = line[26:].strip()
+                
+            if line.strip().startswith('Image path and file name'):
+                parsedline['File Path'] = line[26:].strip()
+            
+            if line.strip().startswith('Device size'):
+                parsedline['Number of Bytes'] = line[26:].split()[0]
+                
+            if line.strip().startswith('Ended'):
+                parsedline['Date of acquisition'] = line[22:41]
+                elapsed = re.match('(\d+) hours, (\d+) minutes and (\d+) seconds', line[43:].strip())
+                elapsedtotal = (3600*int(elapsed.group(1))) + (60*int(elapsed.group(2))) + int(elapsed.group(3))
+                parsedline['Time taken'] = elapsedtotal
+                
+            if line.strip().startswith('MD5 hash verified image'):
+                parsedline['MD5 Hash'] = line[28:].strip()
+                
+            if line.strip().startswith('Format'):
+                parsedline['Format'] = line[26:].strip()
+
+            if line.strip().startswith('State'):
+                badsectors = re.search('with (\d+) bad sectors', line)
+                if badsectors:
+                    badsectorcount = badsectors.group(1)
+                else:
+                    badsectorcount = '0'
+                parsedline['Bad sectors'] = badsectorcount
+
         outfilecsv.writerow(parsedline)
 
     outfile.close()
