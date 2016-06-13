@@ -1,71 +1,80 @@
 import os
-import subprocess
 import sys
 import re
+import argparse
+import csv
+from glob import glob
 
 # set input variables for the source and destination file directories
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('inputdir', metavar='[input_dir]',
+                        help='input directory with .info files')
+    parser.add_argument('outputfile', metavar='[output_file]',
+                        help='output file for CSV data')
+    args = parser.parse_args()
 
-source_dirname= str(sys.argv[1])
-dest_dir = str(sys.argv[2])
+    # Does output dir exist?
+    try:
+        os.path.exists(args.inputdir)
+    except:
+        sys.exit('Quitting: Input directory does not exist.')
 
+    # Does output file exist?
+    if os.path.isfile(args.outputfile):
+        sys.exit('Output file already exists; will not overwrite.')
 
+    # Set up output file
+    outfile = open(args.outputfile, 'w')
+    fieldnames = ['Case number','Evidence number', 'Examiner', 'File Path','Format','Number of Bytes','Date of acquisition',
+                  'Time taken', 'MD5 Hash','Bad sectors']
+    outfilecsv = csv.DictWriter(outfile, fieldnames=fieldnames)
+    outfilecsv.writeheader()
 
-files = []
+    files = glob(os.path.join(args.inputdir, '*.info'))
 
+    for filename in files:
+        parsedline = {}
+        for line in open(filename, 'rU'): 
 
-for file in os.listdir(source_dirname):
-	if file.endswith(".info"):
-		files.append(source_dirname + "\\" + file)
+            if line.strip().startswith('Case number'):
+                parsedline['Case number'] = line[26:].strip()
 
-outfile = open(dest_dir + "ParsedLog.csv", 'w')		
+            if line.strip().startswith('Evidence number'):
+                parsedline['Evidence number'] = line[26:].strip()
 
-outfile.write("Barcode,FilePath,Format,Number of Bytes,Time taken,MD5 Hash,Bad sectors\n")
+            if line.strip().startswith('Examiner'):
+                parsedline['Examiner'] = line[26:].strip()
+                
+            if line.strip().startswith('Image path and file name'):
+                parsedline['File Path'] = line[26:].strip()
+            
+            if line.strip().startswith('Device size'):
+                parsedline['Number of Bytes'] = line[26:].split()[0]
+                
+            if line.strip().startswith('Ended'):
+                parsedline['Date of acquisition'] = line[22:41]
+                elapsed = re.match('(\d+) hours, (\d+) minutes and (\d+) seconds', line[43:].strip())
+                elapsedtotal = (3600*int(elapsed.group(1))) + (60*int(elapsed.group(2))) + int(elapsed.group(3))
+                parsedline['Time taken'] = elapsedtotal
+                
+            if line.strip().startswith('MD5 hash verified image'):
+                parsedline['MD5 Hash'] = line[28:].strip()
+                
+            if line.strip().startswith('Format'):
+                parsedline['Format'] = line[26:].strip()
 
-for filename in files:
+            if line.strip().startswith('State'):
+                badsectors = re.search('with (\d+) bad sectors', line)
+                if badsectors:
+                    badsectorcount = badsectors.group(1)
+                else:
+                    badsectorcount = '0'
+                parsedline['Bad sectors'] = badsectorcount
 
-	
-	barcode, format, filepath, numBytes, timeTaken, MD5Hash = "","","","","",""
-	for line in open(filename):	
-		
-	
-		
-		if line.startswith('   Case number'):
-			res = re.search(":\s\d+",line)
-			barcode = res.group(0)[2:].replace(",","")
-			
-		if line.startswith('Image path and file name'):
-			#print line
-			res = re.search(":\s.+",line)
-			if res is None:
-				throw = ""
-			else:
-				filepath = res.group(0)[2:].replace(",","")
-			#print filepath
-			#print res.group(0)
-		
-		if line.startswith('   User Capacity:'):
-			res = re.search("\s\d.+bytes",line)
-			numBytes = res.group(0)[:-5].replace(",","")
-			
-			
-		if line.startswith('Ended'):
-			res = re.search("\(.+\)",line)
-			timeTaken = res.group(0)[1:-1].replace(",","")
-			
-		if line.startswith('MD5 hash                   :'):
-			res = re.search(":.+",line)
-			MD5Hash = res.group(0)[2:].replace(",","")
-			
-		if line.startswith('Format   '):
-			res = re.search(":.+",line)
-			format = res.group(0)[2:-25].replace(",","")	
-		if line.startswith('State: '):
-			#print line
-			res = re.search(":.+",line)
-			errors = res.group(0)[30:-12].replace(",","")	
-			#print errors
-			
-	outfile.write(barcode + "," + filepath + "," + format + "," + numBytes + "," + timeTaken + "," + MD5Hash + "," + errors + "\n")
+        outfilecsv.writerow(parsedline)
 
+    outfile.close()
 
-outfile.close()
+if __name__ == "__main__":
+    main()
