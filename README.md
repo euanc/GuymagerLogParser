@@ -25,7 +25,7 @@ You can use this to bulk process a folder full of guymager logs by invoking the 
 
 Firstly, the source directory (where the logs are) and secondly the destination file where you would like the CSV file with the results to go.  (This will not overwrite existing files, so choose something that doesn't already exist.)
 
-e.g. in Windows you might use this at the command line (without quotes):
+e.g. in Windows you might use this at the command line:
 
 `c:\python27\python.exe d:\logs\guymagerLogParserV1.py d:\logs\diskImages\ d:\logs\guymager_stats.csv`
 
