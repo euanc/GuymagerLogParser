@@ -29,8 +29,8 @@ e.g. in Windows you might use this at the command line (without quotes):
 
 "c:\python27\python.exe d:\logs\guymagerLogParserV1.py d:\logs\diskImages\ d:\logs\guymager_stats.csv"
 
--Where you have:
-*python 2.7 installed in the default location
-*the program in d:\logs\ 
-*the logs to process in d:\logs\diskImages\
-*the output CSV desired location is d:\logs\guymager_stats.csv
+Where you have:
+* python 2.7 installed in the default location
+* the program in d:\logs\ 
+* the logs to process in d:\logs\diskImages\
+* the output CSV desired location is d:\logs\guymager_stats.csv
