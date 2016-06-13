@@ -27,7 +27,7 @@ Firstly, the source directory (where the logs are) and secondly the destination 
 
 e.g. in Windows you might use this at the command line (without quotes):
 
-"c:\python27\python.exe d:\logs\guymagerLogParserV1.py d:\logs\diskImages\ d:\logs\guymager_stats.csv"
+`c:\python27\python.exe d:\logs\guymagerLogParserV1.py d:\logs\diskImages\ d:\logs\guymager_stats.csv`
 
 Where you have:
 * python 2.7 installed in the default location
