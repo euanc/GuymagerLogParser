@@ -26,8 +26,9 @@ def main():
 
     # Set up output file
     outfile = open(args.outputfile, 'w')
-    fieldnames = ['Case number','Evidence number', 'Examiner', 'File Path','Format','Number of Bytes','Date of acquisition',
-                  'Time taken', 'MD5 Hash','Bad sectors']
+    fieldnames = ['Case number','Evidence number', 'Examiner', 'File Path','Format',
+                  'Number of Bytes','Date of acquisition', 'Time taken', 'MD5 Hash Verified Image',
+                  'Bad sectors']
     outfilecsv = csv.DictWriter(outfile, fieldnames=fieldnames)
     outfilecsv.writeheader()
 
@@ -59,7 +60,9 @@ def main():
                 parsedline['Time taken'] = elapsedtotal
                 
             if line.strip().startswith('MD5 hash verified image'):
-                parsedline['MD5 Hash'] = line[28:].strip()
+                parsedline['MD5 Hash Verified Image'] = line[28:].strip()
+            # NOTE: If the disk image format chosen is not raw (dd) this value will not match
+            #       the hash value of the disk image file created.
                 
             if line.strip().startswith('Format'):
                 parsedline['Format'] = line[26:].strip()
